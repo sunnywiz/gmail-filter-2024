@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GmailFilter2024", "GmailFilter2024\GmailFilter2024.csproj", "{483F0D9C-7C01-4AD1-9AA5-FA60F44DB304}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GmailFilter2024", "GmailFilter2024\GmailFilter2024.csproj", "{483F0D9C-7C01-4AD1-9AA5-FA60F44DB304}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookFilter2024", "OutlookFilter2024\OutlookFilter2024.csproj", "{37000D16-EAA1-4C78-AA3B-461C69BA135E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{483F0D9C-7C01-4AD1-9AA5-FA60F44DB304}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{483F0D9C-7C01-4AD1-9AA5-FA60F44DB304}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{483F0D9C-7C01-4AD1-9AA5-FA60F44DB304}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37000D16-EAA1-4C78-AA3B-461C69BA135E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37000D16-EAA1-4C78-AA3B-461C69BA135E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37000D16-EAA1-4C78-AA3B-461C69BA135E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37000D16-EAA1-4C78-AA3B-461C69BA135E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
