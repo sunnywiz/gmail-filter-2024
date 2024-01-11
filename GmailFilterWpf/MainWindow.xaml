@@ -51,7 +51,13 @@
                     </Paragraph>
                 </FlowDocument>
             </FlowDocumentScrollViewer>
-            <DataGrid  Name="ResultGrid"/>
+            <DataGrid  Name="ResultGrid" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Sender" Binding="{Binding From}" />
+                        <DataGridTextColumn Header="Received Date" Binding="{Binding Date}" />
+                        <DataGridTextColumn Header="Subject" Binding="{Binding Subject}" />
+                    </DataGrid.Columns>
+            </DataGrid>
         </DockPanel>
         <TextBlock Grid.Row="2" Name="StatusText" Text="Updates go here" Foreground="Gray"/>
     </Grid>

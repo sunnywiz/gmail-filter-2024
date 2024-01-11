@@ -111,7 +111,6 @@ public partial class MainWindow : Window
             SlimEmails = SlimEmails.OrderByDescending(x => x.Date).ToList();
             ResultGrid.ItemsSource = SlimEmails;
 
-            // TODO: have LoadEmails skip loading details of the ones we already have loaded.
             // TODO: explicitly set the datagrid so that its grouped by sender, and doesn't show id and threadid
             // TODO: will need our own status of delete, "want to delete", "we deleted it"
             // TODO: will need our own status of read/not read, "mark as not read"
@@ -124,16 +123,6 @@ public partial class MainWindow : Window
             StatusText.Foreground = Brushes.Red;
             StatusText.Text = ex.Message;
         }
-    }
-
-    public class SlimEmail
-    {
-        public string Id { get; set; }
-        public string Etag { get; set; }
-        public string From { get; set; }
-        public string Subject { get; set; }
-        public DateTime Date { get; set; }
-        public string ThreadId { get; set; }
     }
 
     private void SaveLocalCacheButton_OnClick(object sender, RoutedEventArgs e)
