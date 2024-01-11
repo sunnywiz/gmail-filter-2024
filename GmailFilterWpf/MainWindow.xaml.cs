@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using GmailFilterLibrary;
 
 namespace GmailFilterWpf
@@ -29,7 +30,7 @@ namespace GmailFilterWpf
             InitializeComponent();
         }
 
-        private void ConnectButton_OnClick(object sender, RoutedEventArgs e)
+        private async void ConnectButton_OnClick(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -37,14 +38,9 @@ namespace GmailFilterWpf
                 StatusText.Foreground = Brushes.Black;
                 _gmf = new GmailFilter1();
 
-                _gmf.Log = (m) =>
-                {
-                    Trace.WriteLine(m);
-                };
-                
+                _gmf.Log = (m) => { Dispatcher.Invoke(() => { StatusText.Text = m; }, DispatcherPriority.Render); };
                 _gmf.Connect(CredentialsFileText.Text, TokenFileText.Text);
-                StatusText.Text = "Connected.";
-                StatusText.Foreground = Brushes.Blue;
+                _gmf.Log("Connected");
 
                 int numDaysToLoad = int.Parse(DaysToLoadText.Text);
 
