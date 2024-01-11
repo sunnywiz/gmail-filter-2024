@@ -398,3 +398,5 @@ FodyWeavers.xsd
 *.sln.iml
 
 GmailFilter2024/credentials.json
+
+GmailFilterWpf/credentials.json
