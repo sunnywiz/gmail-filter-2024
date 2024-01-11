@@ -76,19 +76,12 @@ public partial class MainWindow : Window
 
             int numDaysToLoad = int.Parse(DaysToLoadText.Text);
 
-            _gmf.LoadEmails(numDaysToLoad);
-            _gmf.Log("Done Loading");
-
             var dict = SlimEmails.ToDictionary(x => x.Id);
+
+            _gmf.LoadAdditionalEmails(numDaysToLoad, (m) => !dict.ContainsKey(m.Id));
             
-            foreach (var email in _gmf.Emails)
+            foreach (var email in _gmf.DetailedEmails)
             {
-                if (dict.TryGetValue(email.Id, out var foundEmail))
-                {
-                    // we already have it, do we need to update it? based on etag i think. 
-                    Trace.WriteLine("Check this");
-                    continue; 
-                }
                 // Check if we already have this email. 
                 
                 // extract Sender's email address, subject, and date received from email
@@ -114,7 +107,8 @@ public partial class MainWindow : Window
                     SlimEmails.Add(slimEmail);
                 }
             }
-            // populate ResultGrid with SlimEmails
+            // populate ResultGrid with SlimEmails, re-sorting it
+            SlimEmails = SlimEmails.OrderByDescending(x => x.Date).ToList();
             ResultGrid.ItemsSource = SlimEmails;
 
             // TODO: have LoadEmails skip loading details of the ones we already have loaded.
