@@ -8,7 +8,7 @@ namespace GmailFilterLibrary
 {
     public class GmailFilter1
     {
-        static string[] Scopes = { GmailService.Scope.GmailReadonly };
+        static string[] Scopes = { GmailService.Scope.GmailModify };
         static string ApplicationName = "Sunny Gmail 2024 Filter";
         private GmailService _gmailService;
 

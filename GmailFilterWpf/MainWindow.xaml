@@ -14,21 +14,45 @@
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0">
             <Button DockPanel.Dock="Right" Name="ConnectButton" Click="ConnectButton_OnClick">Connect</Button>
-            <FlowDocumentScrollViewer>
-                <FlowDocument>
+            <GroupBox Header="Setup stuff (lots of stuff is Hardcoded)">
+                <FlowDocumentScrollViewer>
+                    <FlowDocument PagePadding="0">
+                        <Paragraph>
+                            Using gmail api- you must have registered your email as a tester.  using credentials from
+                            <TextBlock Name="CredentialsFileText" Text="credentials.json" Background="LightGray"/>
+                            and saving token to
+                            <TextBlock Name="TokenFileText" Text="token.json" Background="LightGray"/> .
+                            <LineBreak/>
+                            Local Store at
+                            <TextBlock Name="LocalStoreText" Text="emailstore.json" Background="LightGray"/>
+                            has
+                            <TextBlock Name="EmailCountText" Text="??" Background="LightGray"/> 
+                            emails between
+                            <TextBlock Name="EmailEarliestText" Text="??" Background="LightGray"/> 
+                            and
+                            <TextBlock Name="EmailLatestText" Text="??" Background="LightGray"/>
+                            <LineBreak/>
+                            On connect, get the last
+                            <TextBox Name="DaysToLoadText" Text="1" Background="Yellow"/>
+                            days of emails.
+                        </Paragraph>
+                    </FlowDocument>
+                </FlowDocumentScrollViewer>
+            </GroupBox>
+        </DockPanel>
+        <DockPanel Grid.Row="1">
+            <FlowDocumentScrollViewer DockPanel.Dock="Bottom" Margin="0" Padding="0" >
+                <FlowDocument PagePadding="0">
                     <Paragraph>
-                        Using gmail api- you must have registered your email as a tester.  using credentials from
-                        <TextBlock Name="CredentialsFileText" Text="credentials.json" Background="LightGray"/>
-                        and saving token to
-                        <TextBlock Name="TokenFileText" Text="token.json" Background="LightGray"/>.
-                        Get 
-                        <TextBox Name="DaysToLoadText" Text="1"/>
-                        Days of emails to analyze.
+                    Once the results are loaded, you can
+                    <Button>TODO:Apply Filters</Button>, 
+                    <Button>TODO:Save Deletes</Button>, 
+                    and <Button Name="SaveLocalCacheButton" Click="SaveLocalCacheButton_OnClick">Save Local Cache</Button>
                     </Paragraph>
                 </FlowDocument>
             </FlowDocumentScrollViewer>
+            <DataGrid  Name="ResultGrid"/>
         </DockPanel>
-        <DataGrid Grid.Row="1" Name="ResultGrid"/>
         <TextBlock Grid.Row="2" Name="StatusText" Text="Updates go here" Foreground="Gray"/>
     </Grid>
 </Window>
