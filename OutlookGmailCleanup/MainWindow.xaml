@@ -1,0 +1,36 @@
+﻿<Window x:Class="OutlookGmailCleanup.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:OutlookGmailCleanup"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <FlowDocumentScrollViewer>
+            <FlowDocument>
+                <Paragraph>Using Outlook Interop:  The email account is:
+                    <TextBlock Name="EmailAccountText"  Background="LightGray" Text="sunnywiz@gmail.com"/> , 
+                
+                and the folder is
+                    <TextBlock Name="InboxFolderText" Background="LightGray" Text="Inbox"/> .  
+                We will look back
+                    <TextBox Name="LookBackDaysTextBox" Text="30"/> days for folks who send us too much email. (More days = longer to scan)
+                    <Button Name="ScanButton" 
+                            Click="ScanButton_OnClick">SCAN</Button>
+                    <LineBreak/>
+                    Found 
+                    <TextBlock Name="MessagesCountText" Text="xx" Background="Yellow"/>
+                    messages.
+                </Paragraph>
+            </FlowDocument>
+        </FlowDocumentScrollViewer>
+        <DataGrid Name="EmailDetailsDataGrid" Grid.Row="1"></DataGrid>
+        <TextBlock Grid.Row="2" Name="ErrorText" Foreground="Red" Text="Errors go here"/>
+    </Grid>
+</Window>
