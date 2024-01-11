@@ -28,6 +28,47 @@ public partial class MainWindow : Window
     private GmailFilter1 _gmf;
     private List<SlimEmail> SlimEmails { get; set; }
 
+    private List<GroupedEmailViewModel> GroupedEmails
+    {
+        get;
+        set;
+    }
+
+    public class GroupedEmailViewModel
+    {
+        public GroupedEmailViewModel(IEnumerable<SlimEmail> emails)
+        {
+            Emails = emails.OrderByDescending(x=>x.Date).ToList();
+        }
+        public List<SlimEmail> Emails
+        {
+            get;
+        }
+
+        public string From => Emails.First().From;
+        public int Count => Emails.Count;
+        public DateTime MinDate => Emails.Min(x => x.Date);
+        public DateTime MaxDate => Emails.Max(x => x.Date);
+
+        public decimal? Frequency
+        {
+            get
+            {
+                if (Emails.Count < 2)
+                {
+                    return null;
+                }
+                else
+                {
+                    TimeSpan timeSpan = MaxDate - MinDate;
+                    var totalDays = timeSpan.TotalDays;
+                    if (totalDays < 1.0) return null; 
+                    return (decimal)Emails.Count / (decimal)timeSpan.TotalDays;
+                }
+            }
+        }
+    }
+
     public MainWindow()
     {
         InitializeComponent();
@@ -46,9 +87,9 @@ public partial class MainWindow : Window
                 // populate EmailEarliestText and EmailLatestText from slimEmails
                 EmailEarliestText.Text = SlimEmails.Min(e => e.Date).ToString("d");
                 EmailLatestText.Text = SlimEmails.Max(e => e.Date).ToString("d");
-                
+
                 // populate ResultGrid with SlimEmails
-                ResultGrid.ItemsSource = SlimEmails;
+                PopulateResults();
             }
             else throw new FileNotFoundException("file does not exist");
         }
@@ -79,11 +120,11 @@ public partial class MainWindow : Window
             var dict = SlimEmails.ToDictionary(x => x.Id);
 
             _gmf.LoadAdditionalEmails(numDaysToLoad, (m) => !dict.ContainsKey(m.Id));
-            
+
             foreach (var email in _gmf.DetailedEmails)
             {
                 // Check if we already have this email. 
-                
+
                 // extract Sender's email address, subject, and date received from email
 
                 string senderEmail = email.Payload.Headers.FirstOrDefault(h => h.Name == "From")?.Value;
@@ -108,8 +149,7 @@ public partial class MainWindow : Window
                 }
             }
             // populate ResultGrid with SlimEmails, re-sorting it
-            SlimEmails = SlimEmails.OrderByDescending(x => x.Date).ToList();
-            ResultGrid.ItemsSource = SlimEmails;
+            PopulateResults(); 
 
             // TODO: explicitly set the datagrid so that its grouped by sender, and doesn't show id and threadid
             // TODO: will need our own status of delete, "want to delete", "we deleted it"
@@ -125,13 +165,22 @@ public partial class MainWindow : Window
         }
     }
 
+    private void PopulateResults()
+    {
+        GroupedEmails = SlimEmails
+            .GroupBy(x => x.From)
+            .Select(x => new GroupedEmailViewModel(x))
+            .ToList();
+        ResultGrid.ItemsSource = GroupedEmails;
+    }
+    
     private void SaveLocalCacheButton_OnClick(object sender, RoutedEventArgs e)
     {
         string localStoreFileName = LocalStoreText.Text;
         try
         {
             string json = JsonConvert.SerializeObject(SlimEmails, Formatting.Indented);
-// Write the JSON string to a file
+            // Write the JSON string to a file
             File.WriteAllText(localStoreFileName, json);
             StatusText.Text = $"Saved to {localStoreFileName}";
         }

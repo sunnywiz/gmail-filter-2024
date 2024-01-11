@@ -26,9 +26,9 @@
                             Local Store at
                             <TextBlock Name="LocalStoreText" Text="emailstore.json" Background="LightGray"/>
                             has
-                            <TextBlock Name="EmailCountText" Text="??" Background="LightGray"/> 
+                            <TextBlock Name="EmailCountText" Text="??" Background="LightGray"/>
                             emails between
-                            <TextBlock Name="EmailEarliestText" Text="??" Background="LightGray"/> 
+                            <TextBlock Name="EmailEarliestText" Text="??" Background="LightGray"/>
                             and
                             <TextBlock Name="EmailLatestText" Text="??" Background="LightGray"/>
                             <LineBreak/>
@@ -44,19 +44,36 @@
             <FlowDocumentScrollViewer DockPanel.Dock="Bottom" Margin="0" Padding="0" >
                 <FlowDocument PagePadding="0">
                     <Paragraph>
-                    Once the results are loaded, you can
-                    <Button>TODO:Apply Filters</Button>, 
-                    <Button>TODO:Save Deletes</Button>, 
-                    and <Button Name="SaveLocalCacheButton" Click="SaveLocalCacheButton_OnClick">Save Local Cache</Button>
+                        Once the results are loaded, you can
+                        <Button>TODO:Apply Filters</Button> ,
+                        <Button>TODO:Save Deletes</Button> , 
+                    and
+                        <Button Name="SaveLocalCacheButton" Click="SaveLocalCacheButton_OnClick">Save Local Cache</Button>
                     </Paragraph>
                 </FlowDocument>
             </FlowDocumentScrollViewer>
-            <DataGrid  Name="ResultGrid" AutoGenerateColumns="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Sender" Binding="{Binding From}" />
-                        <DataGridTextColumn Header="Received Date" Binding="{Binding Date}" />
-                        <DataGridTextColumn Header="Subject" Binding="{Binding Subject}" />
-                    </DataGrid.Columns>
+            <DataGrid  Name="ResultGrid" 
+                       AutoGenerateColumns="False"
+                       IsReadOnly="true"
+                       RowDetailsVisibilityMode="VisibleWhenSelected">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="From" Binding="{Binding From}" />
+                    <DataGridTextColumn Header="Count" Binding="{Binding Count}"/>
+                    <DataGridTextColumn Header="MinDate" Binding="{Binding MinDate}"/>
+                    <DataGridTextColumn Header="MaxDate" Binding="{Binding MaxDate}"/>
+                    <DataGridTextColumn Header="Frequency" Binding="{Binding Frequency}"/>
+                </DataGrid.Columns>
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <DataGrid ItemsSource="{Binding Emails}" IsReadOnly="True" AutoGenerateColumns="false">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
+                                <DataGridTextColumn Header="Subject" Binding="{Binding Subject}"/>
+                                <DataGridTextColumn Header="Date" Binding="{Binding Date}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
             </DataGrid>
         </DockPanel>
         <TextBlock Grid.Row="2" Name="StatusText" Text="Updates go here" Foreground="Gray"/>
