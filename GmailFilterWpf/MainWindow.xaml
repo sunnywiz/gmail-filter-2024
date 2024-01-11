@@ -54,24 +54,30 @@
             </FlowDocumentScrollViewer>
             <DataGrid  Name="ResultGrid" 
                        AutoGenerateColumns="False"
-                       IsReadOnly="true"
+                       IsReadOnly="false"
                        RowDetailsVisibilityMode="VisibleWhenSelected">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="From" Binding="{Binding From}" />
-                    <DataGridTextColumn Header="Count" Binding="{Binding Count}"/>
-                    <DataGridTextColumn Header="MinDate" Binding="{Binding MinDate}"/>
-                    <DataGridTextColumn Header="MaxDate" Binding="{Binding MaxDate}"/>
-                    <DataGridTextColumn Header="Frequency" Binding="{Binding Frequency}"/>
+                    <DataGridTextColumn IsReadOnly="True" Header="From" Binding="{Binding From}" />
+                    <DataGridTextColumn IsReadOnly="True" Header="Count" Binding="{Binding Count}"/>
+                    <DataGridTextColumn IsReadOnly="True" Header="MinDate" Binding="{Binding MinDate}"/>
+                    <DataGridTextColumn IsReadOnly="True" Header="MaxDate" Binding="{Binding MaxDate}"/>
+                    <DataGridTextColumn IsReadOnly="True" Header="Frequency" Binding="{Binding Frequency, StringFormat={}{0:F2}}"/>
+                    <DataGridTextColumn Header="Num To Keep" Binding="{Binding NumToKeep}"/>
+                    <DataGridCheckBoxColumn Header="Mark Read" Binding="{Binding MarkAsRead}" IsThreeState="False"/>
                 </DataGrid.Columns>
                 <DataGrid.RowDetailsTemplate>
                     <DataTemplate>
-                        <DataGrid ItemsSource="{Binding Emails}" IsReadOnly="True" AutoGenerateColumns="false">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Left" Name="PruneButton" Click="PruneButton_OnClick">Prune!</Button>
+                            <Button DockPanel.Dock="Left" Name="RememberButton" Click="RememberButton_OnClick">Remember</Button>
+                            <DataGrid ItemsSource="{Binding Emails}" IsReadOnly="True" AutoGenerateColumns="false" MaxHeight="200">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
                                 <DataGridTextColumn Header="Subject" Binding="{Binding Subject}"/>
                                 <DataGridTextColumn Header="Date" Binding="{Binding Date}"/>
                             </DataGrid.Columns>
                         </DataGrid>
+                        </DockPanel>
                     </DataTemplate>
                 </DataGrid.RowDetailsTemplate>
             </DataGrid>

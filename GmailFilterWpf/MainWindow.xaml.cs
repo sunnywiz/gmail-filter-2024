@@ -50,6 +50,9 @@ public partial class MainWindow : Window
         public DateTime MinDate => Emails.Min(x => x.Date);
         public DateTime MaxDate => Emails.Max(x => x.Date);
 
+        public int? NumToKeep { get; set; }
+        public bool MarkAsRead { get; set; }
+        
         public decimal? Frequency
         {
             get
@@ -151,12 +154,19 @@ public partial class MainWindow : Window
             // populate ResultGrid with SlimEmails, re-sorting it
             PopulateResults(); 
 
-            // TODO: explicitly set the datagrid so that its grouped by sender, and doesn't show id and threadid
+            // TODO: Prune button - should mark things to be deleted
             // TODO: will need our own status of delete, "want to delete", "we deleted it"
+            // TODO: things to be deleted should look a certain way
+            // TODO: We will need to persist our settings to a json file as well. and load from that file.  And save to it if changed.
+
+            // TODO: customer filters for the query to gmail?  Defaults to after xxx ? 
+            // TODO: maybe a link to open the message in gmail? 
             // TODO: will need our own status of read/not read, "mark as not read"
-            // TODO: local delete stuff from local cache when its too old
-            // TODO: datagrid row button to add to "clean up" list with # of messages to keep, and whether to mark as read
-            // TODO: CLEANUP button to do the cleanup 
+            // TODO: local delete stuff from local cache when its too old (setting)
+            // TODO: CLEANUP button to do the cleanup online
+            // TODO: Cleanup local store
+            // TODO: all in one button which goes and gets newer stuff, runs the filters, runs the "send cleanup", runs the local store cleanup, and saves the local store.
+            
         }
         catch (Exception ex)
         {
@@ -192,5 +202,15 @@ public partial class MainWindow : Window
             EmailLatestText.Text = "N/A";
             EmailCountText.Text = "0";
         }
+    }
+
+    private void PruneButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        Trace.WriteLine("Floop");
+    }
+
+    private void RememberButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        Trace.WriteLine("Floop");
     }
 }
