@@ -22,12 +22,13 @@
                         and saving token to
                         <TextBlock Name="TokenFileText" Text="token.json" Background="LightGray"/>.
                         Get 
-                        <TextBox Name="DaysToLoadText" Text="5"/>
+                        <TextBox Name="DaysToLoadText" Text="1"/>
                         Days of emails to analyze.
                     </Paragraph>
                 </FlowDocument>
             </FlowDocumentScrollViewer>
         </DockPanel>
+        <DataGrid Grid.Row="1" Name="ResultGrid"/>
         <TextBlock Grid.Row="2" Name="StatusText" Text="Updates go here" Foreground="Gray"/>
     </Grid>
 </Window>

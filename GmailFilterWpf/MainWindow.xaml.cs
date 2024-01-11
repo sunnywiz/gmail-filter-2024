@@ -16,42 +16,73 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using GmailFilterLibrary;
 
-namespace GmailFilterWpf
+namespace GmailFilterWpf;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    private GmailFilter1 _gmf;
+    private List<SlimEmail> SlimEmails { get; set; }
+
+    public MainWindow()
     {
-        private GmailFilter1 _gmf;
+        InitializeComponent();
+    }
 
-        public MainWindow()
+    private async void ConnectButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        try
         {
-            InitializeComponent();
-        }
+            StatusText.Text = "Connecting...";
+            StatusText.Foreground = Brushes.Black;
+            _gmf = new GmailFilter1();
 
-        private async void ConnectButton_OnClick(object sender, RoutedEventArgs e)
+            _gmf.Log = (m) => { Dispatcher.Invoke(() => { StatusText.Text = m; }, DispatcherPriority.Render); };
+            _gmf.Connect(CredentialsFileText.Text, TokenFileText.Text);
+            _gmf.Log("Connected");
+
+            int numDaysToLoad = int.Parse(DaysToLoadText.Text);
+
+            _gmf.LoadEmails(numDaysToLoad);
+            _gmf.Log("Done Loading");
+
+            SlimEmails = new List<SlimEmail>();
+            
+            foreach (var email in _gmf.Emails)
+            {
+                // extract Sender's email address, subject, and date received from email
+                
+                string senderEmail = email.Payload.Headers.FirstOrDefault(h => h.Name == "From")?.Value;
+                
+                string subject = email.Payload.Headers.FirstOrDefault(h => h.Name == "Subject")?.Value;
+                string dateReceived = email.Payload.Headers.FirstOrDefault(h => h.Name == "Date")?.Value;
+                // if all of these are filled out and paresable, create a SlimEmail with these values
+                if (!string.IsNullOrEmpty(senderEmail) && !string.IsNullOrEmpty(subject) && DateTime.TryParse(dateReceived, out DateTime receivedDate))
+                {
+                    SlimEmail slimEmail = new SlimEmail { Id = email.Id, ThreadId = email.ThreadId, From = senderEmail, Subject = subject, Date = receivedDate };
+                    SlimEmails.Add(slimEmail);
+                }
+            }
+            // populate ResultGrid with SlimEmails
+            ResultGrid.ItemsSource = SlimEmails;
+            
+            
+        }
+        catch (Exception ex)
         {
-            try
-            {
-                StatusText.Text = "Connecting...";
-                StatusText.Foreground = Brushes.Black;
-                _gmf = new GmailFilter1();
-
-                _gmf.Log = (m) => { Dispatcher.Invoke(() => { StatusText.Text = m; }, DispatcherPriority.Render); };
-                _gmf.Connect(CredentialsFileText.Text, TokenFileText.Text);
-                _gmf.Log("Connected");
-
-                int numDaysToLoad = int.Parse(DaysToLoadText.Text);
-
-                _gmf.LoadEmails(numDaysToLoad);
-                _gmf.Log("Done Loading");
-            }
-            catch (Exception ex)
-            {
-                StatusText.Foreground = Brushes.Red; 
-                StatusText.Text = ex.Message; 
-            }
+            StatusText.Foreground = Brushes.Red; 
+            StatusText.Text = ex.Message; 
         }
+    }
+
+    public class SlimEmail
+    {
+        public string Id { get; set; }
+        public string From { get; set; }
+        public string Subject { get; set; }
+        public DateTime Date { get; set; }
+        public string ThreadId { get; set; }
     }
 }
