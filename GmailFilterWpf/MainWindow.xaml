@@ -1,0 +1,33 @@
+﻿<Window x:Class="GmailFilterWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GmailFilterWpf"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0">
+            <Button DockPanel.Dock="Right" Name="ConnectButton" Click="ConnectButton_OnClick">Connect</Button>
+            <FlowDocumentScrollViewer>
+                <FlowDocument>
+                    <Paragraph>
+                        Using gmail api- you must have registered your email as a tester.  using credentials from
+                        <TextBlock Name="CredentialsFileText" Text="credentials.json" Background="LightGray"/>
+                        and saving token to
+                        <TextBlock Name="TokenFileText" Text="token.json" Background="LightGray"/>.
+                        Get 
+                        <TextBox Name="DaysToLoadText" Text="5"/>
+                        Days of emails to analyze.
+                    </Paragraph>
+                </FlowDocument>
+            </FlowDocumentScrollViewer>
+        </DockPanel>
+        <TextBlock Grid.Row="2" Name="StatusText" Text="Updates go here" Foreground="Gray"/>
+    </Grid>
+</Window>
