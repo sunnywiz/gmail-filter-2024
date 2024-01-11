@@ -68,7 +68,14 @@ public partial class MainWindow : Window
             // populate ResultGrid with SlimEmails
             ResultGrid.ItemsSource = SlimEmails;
             
-            
+// TODO: save emails in a local cache
+// TODO: load emails from local cache
+// TODO: explicitly set the datagrid so that its grouped by sender, and doesn't show id and threadid
+// TODO: will need our own status of delete, "want to delete", "we deleted it"
+// TODO: will need our own status of read/not read, "mark as not read"
+// TODO: local delete stuff from local cache when its too old
+// TODO: datagrid row button to add to "clean up" list with # of messages to keep, and whether to mark as read
+// TODO: CLEANUP button to do the cleanup 
         }
         catch (Exception ex)
         {
