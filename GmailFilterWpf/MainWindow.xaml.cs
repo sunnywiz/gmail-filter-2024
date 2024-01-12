@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -34,8 +36,10 @@ public partial class MainWindow : Window
         set;
     }
 
-    public class GroupedEmailViewModel
+    public class GroupedEmailViewModel : INotifyPropertyChanged
     {
+        private string _numToKeep;
+
         public GroupedEmailViewModel(IEnumerable<SlimEmail> emails)
         {
             Emails = emails.OrderByDescending(x=>x.Date).ToList();
@@ -50,7 +54,17 @@ public partial class MainWindow : Window
         public DateTime MinDate => Emails.Min(x => x.Date);
         public DateTime MaxDate => Emails.Max(x => x.Date);
 
-        public int? NumToKeep { get; set; }
+        public string NumToKeep
+        {
+            get => _numToKeep;
+            set
+            {
+                if (value == _numToKeep) return;
+                _numToKeep = value;
+                OnPropertyChanged();
+            }
+        }
+
         public bool MarkAsRead { get; set; }
         
         public decimal? Frequency
@@ -69,6 +83,21 @@ public partial class MainWindow : Window
                     return (decimal)Emails.Count / (decimal)timeSpan.TotalDays;
                 }
             }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 
@@ -124,10 +153,16 @@ public partial class MainWindow : Window
 
             _gmf.LoadAdditionalEmails(numDaysToLoad, (m) => !dict.ContainsKey(m.Id));
 
+            foreach (var email in _gmf.BareEmails)
+            {
+                if (dict.TryGetValue(email.Id, out var slim))
+                {
+                    slim.DeleteState = DeleteState.Alive;
+                }
+            }
+            
             foreach (var email in _gmf.DetailedEmails)
             {
-                // Check if we already have this email. 
-
                 // extract Sender's email address, subject, and date received from email
 
                 string senderEmail = email.Payload.Headers.FirstOrDefault(h => h.Name == "From")?.Value;
@@ -143,10 +178,10 @@ public partial class MainWindow : Window
                     {
                         Id = email.Id,
                         ThreadId = email.ThreadId,
-                        Etag = email.ETag,
                         From = senderEmail,
                         Subject = subject,
-                        Date = receivedDate
+                        Date = receivedDate, 
+                        DeleteState = DeleteState.Alive
                     };
                     SlimEmails.Add(slimEmail);
                 }
@@ -204,13 +239,38 @@ public partial class MainWindow : Window
         }
     }
 
-    private void PruneButton_OnClick(object sender, RoutedEventArgs e)
+    private void PruneNowButton_OnClick(object sender, RoutedEventArgs e)
     {
-        Trace.WriteLine("Floop");
+        var g = ((Button)sender).DataContext as GroupedEmailViewModel;
+        if (g == null) return;
+
+        PruneGroup(g);
     }
 
-    private void RememberButton_OnClick(object sender, RoutedEventArgs e)
+    private void PruneGroup(GroupedEmailViewModel g)
     {
-        Trace.WriteLine("Floop");
+        if (!String.IsNullOrEmpty(g.NumToKeep) && int.TryParse(g.NumToKeep, out var dKeep))
+        {
+            var sorted = g.Emails.OrderByDescending(x => x.Date).ToList();
+            foreach (var email in sorted)
+            {
+                if (email.DeleteState == DeleteState.Alive)
+                {
+                    dKeep--;
+                    if (dKeep <= 0)
+                    {
+                        email.DeleteState = DeleteState.PendingDelete;
+                    }
+                }
+            }
+
+            return; 
+        }
+
+        // no numtokeep specified, undelete anything that we were going to delete
+        foreach (var email in g.Emails)
+        {
+            if (email.DeleteState == DeleteState.PendingDelete) email.DeleteState = DeleteState.Alive;
+        }
     }
 }
