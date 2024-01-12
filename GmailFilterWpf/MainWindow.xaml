@@ -16,15 +16,14 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0">
-            <Button DockPanel.Dock="Right" Name="ConnectButton" Click="ConnectButton_OnClick">Connect</Button>
             <GroupBox Header="Setup stuff (lots of stuff is Hardcoded)">
                 <FlowDocumentScrollViewer>
                     <FlowDocument PagePadding="0">
                         <Paragraph>
                             Using gmail api- you must have registered your email as a tester.  using credentials from
                             <TextBlock Name="CredentialsFileText" Text="credentials.json" Background="LightGray"/>
-                            and saving token to
-                            <TextBlock Name="TokenFileText" Text="token.json" Background="LightGray"/> .
+                            and saving any user tokens to the folder
+                            <TextBlock Name="TokenFolderText" Text="tokens" Background="LightGray"/>
                             <LineBreak/>
                             Local Store at
                             <TextBlock Name="LocalStoreText" Text="emailstore.json" Background="LightGray"/>
@@ -36,8 +35,9 @@
                             <TextBlock Name="EmailLatestText" Text="??" Background="LightGray"/>
                             <LineBreak/>
                             On connect, get the last
-                            <TextBox Name="DaysToLoadText" Text="1" Background="Yellow"/>
-                            days of emails.
+                            <TextBox Name="DaysToLoadText" Text="1" MinWidth="30" Background="Yellow"/>
+                            days of emails. Its about half a second per email that needs detail. 
+                            <Button Name="GetEmailsButton" Click="GetEmails_Click">Get More Emails</Button>
                         </Paragraph>
                     </FlowDocument>
                 </FlowDocumentScrollViewer>
@@ -49,7 +49,7 @@
                     <Paragraph>
                         Once the results are loaded, you can
                         <Button>TODO:Apply Filters</Button> ,
-                        <Button>TODO:Save Deletes</Button> , 
+                        <Button Name="SendDeletesButton" Click="SendDeletesButton_OnClick">Send Deletes</Button> , 
                     and
                         <Button Name="SaveLocalCacheButton" Click="SaveLocalCacheButton_OnClick">Save Local Cache</Button>
                     </Paragraph>
@@ -57,7 +57,7 @@
             </FlowDocumentScrollViewer>
             <DataGrid  Name="ResultGrid" 
                        AutoGenerateColumns="False"
-                       IsReadOnly="false"
+                       IsReadOnly="true"
                        RowDetailsVisibilityMode="VisibleWhenSelected">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="From" Binding="{Binding From}" />

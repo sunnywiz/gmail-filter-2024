@@ -28,74 +28,8 @@ namespace GmailFilterWpf;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private GmailFilter1 _gmf;
     private List<SlimEmail> SlimEmails { get; set; }
     private ObservableCollection<GroupedEmailViewModel> _groupedEmails { get; set; }
-
-    public class GroupedEmailViewModel : INotifyPropertyChanged
-    {
-        private string _numToKeep;
-
-        public GroupedEmailViewModel(IEnumerable<SlimEmail> emails)
-        {
-            Emails = emails.OrderByDescending(x=>x.Date).ToList();
-        }
-        public List<SlimEmail> Emails
-        {
-            get;
-        }
-
-        public string From => Emails.First().From;
-        public int Count => Emails.Count;
-        public DateTime MinDate => Emails.Min(x => x.Date);
-        public DateTime MaxDate => Emails.Max(x => x.Date);
-
-        public string NumToKeep
-        {
-            get => _numToKeep;
-            set
-            {
-                if (value == _numToKeep) return;
-                _numToKeep = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public bool MarkAsRead { get; set; }
-        
-        public decimal? Frequency
-        {
-            get
-            {
-                if (Emails.Count < 2)
-                {
-                    return null;
-                }
-                else
-                {
-                    TimeSpan timeSpan = MaxDate - MinDate;
-                    var totalDays = timeSpan.TotalDays;
-                    if (totalDays < 1.0) return null; 
-                    return (decimal)Emails.Count / (decimal)timeSpan.TotalDays;
-                }
-            }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-            field = value;
-            OnPropertyChanged(propertyName);
-            return true;
-        }
-    }
 
     public MainWindow()
     {
@@ -133,25 +67,28 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void ConnectButton_OnClick(object sender, RoutedEventArgs e)
+    private async void GetEmails_Click(object sender, RoutedEventArgs e)
     {
         try
         {
+            // TODO Status Bar is kinda useless. Now that we have Observable, just fill up the grid as we go. 
+            // This means we'll have to start this work in a separate task and do the Invoke thing to get it on the UI thread
+            // We should absorb the gmail helper class into some commands here, there's not enough to justify it being its own class
+            
             StatusText.Text = "Connecting...";
             StatusText.Foreground = Brushes.Black;
-            _gmf = new GmailFilter1();
-
-            _gmf.Log = (m) => { Dispatcher.Invoke(() => { StatusText.Text = m; }, DispatcherPriority.Render); };
-            _gmf.Connect(CredentialsFileText.Text, TokenFileText.Text);
-            _gmf.Log("Connected");
+            var gh = new MyGmailHelper();
+            gh.Log = (m) => { Dispatcher.Invoke(() => { StatusText.Text = m; }, DispatcherPriority.Render); };
+            gh.Connect(CredentialsFileText.Text, TokenFolderText.Text);
+            gh.Log("Connected");
 
             int numDaysToLoad = int.Parse(DaysToLoadText.Text);
 
             var dict = SlimEmails.ToDictionary(x => x.Id);
 
-            _gmf.LoadAdditionalEmails(numDaysToLoad, (m) => !dict.ContainsKey(m.Id));
+            gh.LoadAdditionalEmails(numDaysToLoad, (m) => !dict.ContainsKey(m.Id));
 
-            foreach (var email in _gmf.BareEmails)
+            foreach (var email in gh.BareEmails)
             {
                 if (dict.TryGetValue(email.Id, out var slim))
                 {
@@ -159,7 +96,7 @@ public partial class MainWindow : Window
                 }
             }
             
-            foreach (var email in _gmf.DetailedEmails)
+            foreach (var email in gh.DetailedEmails)
             {
                 // extract Sender's email address, subject, and date received from email
 
@@ -187,14 +124,12 @@ public partial class MainWindow : Window
             // populate ResultGrid with SlimEmails, re-sorting it
             PopulateResults(); 
 
-            // TODO: Prune button - should mark things to be deleted
-            // TODO: will need our own status of delete, "want to delete", "we deleted it"
             // TODO: things to be deleted should look a certain way
-            // TODO: We will need to persist our settings to a json file as well. and load from that file.  And save to it if changed.
+            // TODO: We will need to persist our desired delete settings to a json file as well. and load from that file.  And save to it if changed.
 
             // TODO: customer filters for the query to gmail?  Defaults to after xxx ? 
             // TODO: maybe a link to open the message in gmail? 
-            // TODO: will need our own status of read/not read, "mark as not read"
+            // TODO: will need our own status of read/not read, "mark as not read".  Use bold for unread.  Gray for we deleted it
             // TODO: local delete stuff from local cache when its too old (setting)
             // TODO: CLEANUP button to do the cleanup online
             // TODO: Cleanup local store
@@ -269,6 +204,86 @@ public partial class MainWindow : Window
         foreach (var email in g.Emails)
         {
             if (email.DeleteState == DeleteState.PendingDelete) email.DeleteState = DeleteState.Alive;
+        }
+    }
+
+    private void SendDeletesButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var gh = new MyGmailHelper();
+        gh.Log = (m) => { Dispatcher.Invoke(() => { StatusText.Text = m; }, DispatcherPriority.Render); };
+        gh.Connect(CredentialsFileText.Text, TokenFolderText.Text);
+        foreach (var g in _groupedEmails)
+        {
+            foreach (var email in g.Emails.Where(x => x.DeleteState == DeleteState.PendingDelete))
+            {
+                gh.TrashEmail(email.Id);
+                email.DeleteState = DeleteState.Deleted;
+            }
+        }
+    }
+
+    public class GroupedEmailViewModel : INotifyPropertyChanged
+    {
+        private string _numToKeep;
+
+        public GroupedEmailViewModel(IEnumerable<SlimEmail> emails)
+        {
+            Emails = emails.OrderByDescending(x=>x.Date).ToList();
+        }
+        public List<SlimEmail> Emails
+        {
+            get;
+        }
+
+        public string From => Emails.First().From;
+        public int Count => Emails.Count;
+        public DateTime MinDate => Emails.Min(x => x.Date);
+        public DateTime MaxDate => Emails.Max(x => x.Date);
+
+        public string NumToKeep
+        {
+            get => _numToKeep;
+            set
+            {
+                if (value == _numToKeep) return;
+                _numToKeep = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool MarkAsRead { get; set; }
+        
+        public decimal? Frequency
+        {
+            get
+            {
+                if (Emails.Count < 2)
+                {
+                    return null;
+                }
+                else
+                {
+                    TimeSpan timeSpan = MaxDate - MinDate;
+                    var totalDays = timeSpan.TotalDays;
+                    if (totalDays < 1.0) return null; 
+                    return (decimal)Emails.Count / (decimal)timeSpan.TotalDays;
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }
