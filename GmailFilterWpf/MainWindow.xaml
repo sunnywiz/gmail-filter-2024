@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GmailFilterWpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1000">
+        Title="MainWindow" Height="800" Width="1000"
+        >
     <Window.Resources>
         <local:DebuggerConverter x:Key="DebuggerConverter" />
     </Window.Resources>
@@ -25,14 +26,17 @@
                             and saving any user tokens to the folder
                             <TextBlock Name="TokenFolderText" Text="tokens" Background="LightGray"/>
                             <LineBreak/>
-                            Local Store at
-                            <TextBlock Name="LocalStoreText" Text="emailstore.json" Background="LightGray"/>
+                            Email Local Store at
+                            <TextBlock Name="EmailLocalStoreText" Text="emailstore.json" Background="LightGray"/>
                             has
                             <TextBlock Name="EmailCountText" Text="??" Background="LightGray"/>
                             emails between
                             <TextBlock Name="EmailEarliestText" Text="??" Background="LightGray"/>
                             and
                             <TextBlock Name="EmailLatestText" Text="??" Background="LightGray"/>
+                            <LineBreak/>
+                            Rule Local Store at 
+                            <TextBlock Name="RuleLocalStoreText" Text="rulestore.json" Background="LightGray"/> holds any rules we want to remember.
                             <LineBreak/>
                             On connect, get the last
                             <TextBox Name="DaysToLoadText" Text="1" MinWidth="30" Background="Yellow"/>
@@ -48,10 +52,8 @@
                 <FlowDocument PagePadding="0">
                     <Paragraph>
                         Once the results are loaded, you can
-                        <Button>TODO:Apply Filters</Button> ,
-                        <Button Name="SendDeletesButton" Click="SendDeletesButton_OnClick">Send Deletes</Button> , 
-                    and
-                        <Button Name="SaveLocalCacheButton" Click="SaveLocalCacheButton_OnClick">Save Local Cache</Button>
+                        <Button>TODO:Apply All Filters</Button> or 
+                        <Button Name="SendDeletesButton" Click="SendDeletesButton_OnClick">Send Deletes</Button> 
                     </Paragraph>
                 </FlowDocument>
             </FlowDocumentScrollViewer>

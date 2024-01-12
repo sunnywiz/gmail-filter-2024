@@ -37,7 +37,8 @@ public partial class MainWindow : Window
         _groupedEmails = new ObservableCollection<GroupedEmailViewModel>();
         ResultGrid.ItemsSource = _groupedEmails;
 
-        string localStoreFileName = LocalStoreText.Text;
+        string localStoreFileName = EmailLocalStoreText.Text;
+        
         try
         {
             // load SlimEmails from local store
@@ -74,7 +75,7 @@ public partial class MainWindow : Window
             // TODO 15 - Usability - Change from status bar to async filling as we go updating observable.
             // This means we'll have to start this work in a separate task and do the Invoke thing to get it on the UI thread
             // We should absorb the gmail helper class into some commands here, there's not enough to justify it being its own class
-            
+
             StatusText.Text = "Connecting...";
             StatusText.Foreground = Brushes.Black;
             var gh = new MyGmailHelper();
@@ -95,7 +96,7 @@ public partial class MainWindow : Window
                     slim.DeleteState = DeleteState.Alive;
                 }
             }
-            
+
             foreach (var email in gh.DetailedEmails)
             {
                 // extract Sender's email address, subject, and date received from email
@@ -115,25 +116,27 @@ public partial class MainWindow : Window
                         ThreadId = email.ThreadId,
                         From = senderEmail,
                         Subject = subject,
-                        Date = receivedDate, 
+                        Date = receivedDate,
                         DeleteState = DeleteState.Alive
                     };
                     SlimEmails.Add(slimEmail);
                 }
             }
             // populate ResultGrid with SlimEmails, re-sorting it
-            PopulateResults(); 
+            PopulateResults();
 
             // TODO 40 - UI -  things to be deleted should look a certain way
+
             // TODO 10 - Core -  We will need to persist our desired delete settings to a json file as well. and load from that file.  And save to it if changed.
 
             // TODO 60 - Bonus - customer filters for the query to gmail?  Defaults to after xxx ?  that way you can load ranges 
             // TODO 60 - Bonus - maybe a link to open the message in gmail? 
             // TODO 50 - Feature -  will need our own status of read/not read, "mark as not read".  Use bold for unread.  Gray for we deleted it
             // TODO 20 - LongerTermCore -  local delete stuff from local cache when its too old (setting)
-            // TODO 10 - Usability - should not have to manually save local store, should happen any time something updates or on a timer and always on exit.
+
             // TODO 10 - Core -  all in one button which goes and gets newer stuff, runs the filters, runs the "send cleanup", runs the local store cleanup, and saves the local store.
-            
+            SaveLocalEmailCache();
+
         }
         catch (Exception ex)
         {
@@ -148,27 +151,15 @@ public partial class MainWindow : Window
         foreach (var email in SlimEmails
                      .GroupBy(x => x.From)
                      .Select(x => new GroupedEmailViewModel(x))
-                ) _groupedEmails.Add(email); 
+                ) _groupedEmails.Add(email);
     }
-    
-    private void SaveLocalCacheButton_OnClick(object sender, RoutedEventArgs e)
+
+    private void SaveLocalEmailCache()
     {
-        string localStoreFileName = LocalStoreText.Text;
-        try
-        {
-            string json = JsonConvert.SerializeObject(SlimEmails, Formatting.Indented);
-            // Write the JSON string to a file
-            File.WriteAllText(localStoreFileName, json);
-            StatusText.Text = $"Saved to {localStoreFileName}";
-        }
-        catch (Exception ex)
-        {
-            StatusText.Text = $"Could not load from {localStoreFileName}: {ex.Message}";
-            SlimEmails = new List<SlimEmail>();
-            EmailEarliestText.Text = "N/A";
-            EmailLatestText.Text = "N/A";
-            EmailCountText.Text = "0";
-        }
+        string localStoreFileName = EmailLocalStoreText.Text;
+        string json = JsonConvert.SerializeObject(SlimEmails, Formatting.Indented);
+        // Write the JSON string to a file
+        File.WriteAllText(localStoreFileName, json);
     }
 
     private void PruneNowButton_OnClick(object sender, RoutedEventArgs e)
@@ -177,6 +168,7 @@ public partial class MainWindow : Window
         if (g == null) return;
 
         PruneGroup(g);
+        SaveLocalEmailCache();
     }
 
     private void PruneGroup(GroupedEmailViewModel g)
@@ -196,7 +188,7 @@ public partial class MainWindow : Window
                 }
             }
 
-            return; 
+            return;
         }
 
         // no numtokeep specified, undelete anything that we were going to delete
@@ -220,6 +212,7 @@ public partial class MainWindow : Window
                 email.DeleteState = DeleteState.Deleted;
             }
         }
+        SaveLocalEmailCache();
     }
 
     public class GroupedEmailViewModel : INotifyPropertyChanged
@@ -228,7 +221,7 @@ public partial class MainWindow : Window
 
         public GroupedEmailViewModel(IEnumerable<SlimEmail> emails)
         {
-            Emails = emails.OrderByDescending(x=>x.Date).ToList();
+            Emails = emails.OrderByDescending(x => x.Date).ToList();
         }
         public List<SlimEmail> Emails
         {
@@ -236,13 +229,13 @@ public partial class MainWindow : Window
         }
 
         public string From => Emails.First().From;
-        
+
         // TODO 20 - Usability - The count should be Active emails only 
         public int Count => Emails.Count;
-        
+
         // TODO 21 - UI - We don't need to expose mindate 
         public DateTime MinDate => Emails.Min(x => x.Date);
-        
+
         public DateTime MaxDate => Emails.Max(x => x.Date);
 
         public string NumToKeep
@@ -269,7 +262,7 @@ public partial class MainWindow : Window
                 {
                     TimeSpan timeSpan = MaxDate - MinDate;
                     var totalDays = timeSpan.TotalDays;
-                    if (totalDays < 1.0) return null; 
+                    if (totalDays < 1.0) return null;
                     return (decimal)Emails.Count / (decimal)timeSpan.TotalDays;
                 }
             }
