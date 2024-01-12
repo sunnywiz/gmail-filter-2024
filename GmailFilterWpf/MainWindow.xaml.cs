@@ -71,7 +71,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            // TODO Status Bar is kinda useless. Now that we have Observable, just fill up the grid as we go. 
+            // TODO 15 - Usability - Change from status bar to async filling as we go updating observable.
             // This means we'll have to start this work in a separate task and do the Invoke thing to get it on the UI thread
             // We should absorb the gmail helper class into some commands here, there's not enough to justify it being its own class
             
@@ -124,16 +124,15 @@ public partial class MainWindow : Window
             // populate ResultGrid with SlimEmails, re-sorting it
             PopulateResults(); 
 
-            // TODO: things to be deleted should look a certain way
-            // TODO: We will need to persist our desired delete settings to a json file as well. and load from that file.  And save to it if changed.
+            // TODO 40 - UI -  things to be deleted should look a certain way
+            // TODO 10 - Core -  We will need to persist our desired delete settings to a json file as well. and load from that file.  And save to it if changed.
 
-            // TODO: customer filters for the query to gmail?  Defaults to after xxx ? 
-            // TODO: maybe a link to open the message in gmail? 
-            // TODO: will need our own status of read/not read, "mark as not read".  Use bold for unread.  Gray for we deleted it
-            // TODO: local delete stuff from local cache when its too old (setting)
-            // TODO: CLEANUP button to do the cleanup online
-            // TODO: Cleanup local store
-            // TODO: all in one button which goes and gets newer stuff, runs the filters, runs the "send cleanup", runs the local store cleanup, and saves the local store.
+            // TODO 60 - Bonus - customer filters for the query to gmail?  Defaults to after xxx ?  that way you can load ranges 
+            // TODO 60 - Bonus - maybe a link to open the message in gmail? 
+            // TODO 50 - Feature -  will need our own status of read/not read, "mark as not read".  Use bold for unread.  Gray for we deleted it
+            // TODO 20 - LongerTermCore -  local delete stuff from local cache when its too old (setting)
+            // TODO 10 - Usability - should not have to manually save local store, should happen any time something updates or on a timer and always on exit.
+            // TODO 10 - Core -  all in one button which goes and gets newer stuff, runs the filters, runs the "send cleanup", runs the local store cleanup, and saves the local store.
             
         }
         catch (Exception ex)
@@ -209,6 +208,7 @@ public partial class MainWindow : Window
 
     private void SendDeletesButton_OnClick(object sender, RoutedEventArgs e)
     {
+        // TODO 15 - Usability - Grab all the emails, we know how many, do a progress bar, async it, save local store after.
         var gh = new MyGmailHelper();
         gh.Log = (m) => { Dispatcher.Invoke(() => { StatusText.Text = m; }, DispatcherPriority.Render); };
         gh.Connect(CredentialsFileText.Text, TokenFolderText.Text);
@@ -236,8 +236,13 @@ public partial class MainWindow : Window
         }
 
         public string From => Emails.First().From;
+        
+        // TODO 20 - Usability - The count should be Active emails only 
         public int Count => Emails.Count;
+        
+        // TODO 21 - UI - We don't need to expose mindate 
         public DateTime MinDate => Emails.Min(x => x.Date);
+        
         public DateTime MaxDate => Emails.Max(x => x.Date);
 
         public string NumToKeep
@@ -251,8 +256,7 @@ public partial class MainWindow : Window
             }
         }
 
-        public bool MarkAsRead { get; set; }
-        
+        // TODO 22 - Usability - Frequency does need to include historical emails
         public decimal? Frequency
         {
             get
