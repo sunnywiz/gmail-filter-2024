@@ -79,7 +79,15 @@
                                     Mode=TwoWay, 
                                     UpdateSourceTrigger=PropertyChanged
                                     }" MinWidth="20"></TextBox>
+                                <Label>(blank means keep all)</Label>
                                 <Button Click="PruneNowButton_OnClick">Prune Now</Button>
+                                <Label Margin="20 0 0 0 ">Remember This:</Label>
+                                <CheckBox Name="RememberPruneSettingCheckbox" 
+                                          IsChecked="{Binding 
+                                    Path=RememberPruneSetting,
+                                    Mode=TwoWay,
+                                    UpdateSourceTrigger=PropertyChanged}"
+                                          Checked="RememberPruneSetting_Checked"/>
                             </WrapPanel>
                             <DataGrid ItemsSource="{Binding Emails}" IsReadOnly="True" AutoGenerateColumns="false" MaxHeight="200">
                             <DataGrid.Columns>

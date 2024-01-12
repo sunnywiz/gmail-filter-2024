@@ -2,21 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using GmailFilterLibrary;
 using Newtonsoft.Json;
@@ -55,6 +47,7 @@ public partial class MainWindow : Window
 
                 // populate ResultGrid with SlimEmails
                 PopulateResults();
+                
             }
             else throw new FileNotFoundException("file does not exist");
         }
@@ -152,6 +145,7 @@ public partial class MainWindow : Window
                      .GroupBy(x => x.From)
                      .Select(x => new GroupedEmailViewModel(x))
                 ) _groupedEmails.Add(email);
+        LoadLocalRuleCache();
     }
 
     private void SaveLocalEmailCache()
@@ -218,6 +212,7 @@ public partial class MainWindow : Window
     public class GroupedEmailViewModel : INotifyPropertyChanged
     {
         private string _numToKeep;
+        private bool _rememberPruneSetting;
 
         public GroupedEmailViewModel(IEnumerable<SlimEmail> emails)
         {
@@ -268,6 +263,17 @@ public partial class MainWindow : Window
             }
         }
 
+        public bool RememberPruneSetting
+        {
+            get => _rememberPruneSetting;
+            set
+            {
+                if (value == _rememberPruneSetting) return;
+                _rememberPruneSetting = value;
+                OnPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -281,6 +287,48 @@ public partial class MainWindow : Window
             field = value;
             OnPropertyChanged(propertyName);
             return true;
+        }
+    }
+
+    private void RememberPruneSetting_Checked(object sender, RoutedEventArgs e)
+    {
+        // If you change even one checkbox, we have to save the rules out to local rule storage again
+        SaveLocalRuleCache();
+    }
+
+    private void SaveLocalRuleCache()
+    {
+        // Iterate over _groupedEmails.  For any where RememberPruneSetting is true,
+        // build a smaller class of From and NumToKeep and
+        // save that in JSON format to the file whose name is in RuleLocalStoreText
+        var ruleList = _groupedEmails.Where(g => g.RememberPruneSetting)
+            .Select(g => new LocalRule { From = g.From, NumToKeep = g.NumToKeep })
+            .ToList();
+        string ruleLocalStoreFileName = RuleLocalStoreText.Text;
+        string ruleJson = JsonConvert.SerializeObject(ruleList, Formatting.Indented);
+        File.WriteAllText(ruleLocalStoreFileName, ruleJson);
+    }
+
+    public class LocalRule
+    {
+        public string From { get; set; }
+        public string NumToKeep { get; set; }
+    }
+    
+    private void LoadLocalRuleCache()
+    {
+        // Load a list of LocalRule from the json file whose name is in RuleLocalStoreText.
+        var ruleLocalStoreFileName = RuleLocalStoreText.Text;
+        var ruleJson = File.ReadAllText(ruleLocalStoreFileName);
+        var ruleList = JsonConvert.DeserializeObject<List<LocalRule>>(ruleJson);
+        foreach (var rule in ruleList)
+        {
+            var groupedEmail = _groupedEmails.FirstOrDefault(g => g.From == rule.From);
+            if (groupedEmail != null)
+            {
+                groupedEmail.NumToKeep = rule.NumToKeep;
+                groupedEmail.RememberPruneSetting = true;
+            }
         }
     }
 }
