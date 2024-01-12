@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GmailFilterWpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="800" Width="1000">
+    <Window.Resources>
+        <local:DebuggerConverter x:Key="DebuggerConverter" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -54,7 +57,7 @@
             </FlowDocumentScrollViewer>
             <DataGrid  Name="ResultGrid" 
                        AutoGenerateColumns="False"
-                       IsReadOnly="true"
+                       IsReadOnly="false"
                        RowDetailsVisibilityMode="VisibleWhenSelected">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="From" Binding="{Binding From}" />
@@ -62,14 +65,18 @@
                     <DataGridTextColumn Header="MinDate" Binding="{Binding MinDate}"/>
                     <DataGridTextColumn Header="MaxDate" Binding="{Binding MaxDate}"/>
                     <DataGridTextColumn Header="Frequency" Binding="{Binding Frequency, StringFormat={}{0:F2}}"/>
-                    <DataGridTextColumn Header="Num To Keep" Binding="{Binding NumToKeep}"/>
+                    <!-- DataGridTextColumn Header="Num To Keep" Binding="{Binding NumToKeep}"/ -->
                 </DataGrid.Columns>
                 <DataGrid.RowDetailsTemplate>
                     <DataTemplate>
                         <DockPanel>
                             <WrapPanel DockPanel.Dock="Top">
                                 <Label>NumToKeep: </Label>
-                                <TextBox Text="{Binding NumToKeep, Mode=TwoWay}" MinWidth="20"></TextBox>
+                                <TextBox Text="{Binding 
+                                    Path=NumToKeep, 
+                                    Mode=TwoWay, 
+                                    UpdateSourceTrigger=PropertyChanged
+                                    }" MinWidth="20"></TextBox>
                                 <Button Click="PruneNowButton_OnClick">Prune Now</Button>
                             </WrapPanel>
                             <DataGrid ItemsSource="{Binding Emails}" IsReadOnly="True" AutoGenerateColumns="false" MaxHeight="200">

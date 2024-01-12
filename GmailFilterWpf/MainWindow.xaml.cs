@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -29,12 +30,7 @@ public partial class MainWindow : Window
 {
     private GmailFilter1 _gmf;
     private List<SlimEmail> SlimEmails { get; set; }
-
-    private List<GroupedEmailViewModel> GroupedEmails
-    {
-        get;
-        set;
-    }
+    private ObservableCollection<GroupedEmailViewModel> _groupedEmails { get; set; }
 
     public class GroupedEmailViewModel : INotifyPropertyChanged
     {
@@ -104,6 +100,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        _groupedEmails = new ObservableCollection<GroupedEmailViewModel>();
+        ResultGrid.ItemsSource = _groupedEmails;
 
         string localStoreFileName = LocalStoreText.Text;
         try
@@ -212,11 +210,11 @@ public partial class MainWindow : Window
 
     private void PopulateResults()
     {
-        GroupedEmails = SlimEmails
-            .GroupBy(x => x.From)
-            .Select(x => new GroupedEmailViewModel(x))
-            .ToList();
-        ResultGrid.ItemsSource = GroupedEmails;
+        _groupedEmails.Clear();
+        foreach (var email in SlimEmails
+                     .GroupBy(x => x.From)
+                     .Select(x => new GroupedEmailViewModel(x))
+                ) _groupedEmails.Add(email); 
     }
     
     private void SaveLocalCacheButton_OnClick(object sender, RoutedEventArgs e)
@@ -257,7 +255,7 @@ public partial class MainWindow : Window
                 if (email.DeleteState == DeleteState.Alive)
                 {
                     dKeep--;
-                    if (dKeep <= 0)
+                    if (dKeep < 0)
                     {
                         email.DeleteState = DeleteState.PendingDelete;
                     }
