@@ -68,7 +68,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void GetEmails_Click(object sender, RoutedEventArgs e)
+    private void GetEmails_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -347,5 +347,13 @@ public partial class MainWindow : Window
             PruneGroup(g);
         }
         SaveLocalEmailCache();
+    }
+
+    private void DoEverything_OnClick(object sender, RoutedEventArgs e)
+    {
+        GetEmails_Click(sender, e);
+        ApplyAllButton_OnClick(sender, e); 
+        SendDeletesButton_OnClick(sender,e);
+        StatusText.Text = "EVERYTHING DONE";
     }
 }

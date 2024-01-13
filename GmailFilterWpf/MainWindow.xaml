@@ -17,6 +17,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0">
+            <Button DockPanel.Dock="Right" Name="DoEverything" Click="DoEverything_OnClick">Do Everything</Button>
             <GroupBox Header="Setup stuff (lots of stuff is Hardcoded)">
                 <FlowDocumentScrollViewer>
                     <FlowDocument PagePadding="0">
