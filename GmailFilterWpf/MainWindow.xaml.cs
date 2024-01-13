@@ -41,10 +41,17 @@ public partial class MainWindow : Window
                 // Deserialize the JSON string to a List<SlimEmails>
                 SlimEmails = JsonConvert.DeserializeObject<List<SlimEmail>>(json);
                 EmailCountText.Text = SlimEmails.Count.ToString();
-                // populate EmailEarliestText and EmailLatestText from slimEmails
-                EmailEarliestText.Text = SlimEmails.Min(e => e.Date).ToString("d");
-                EmailLatestText.Text = SlimEmails.Max(e => e.Date).ToString("d");
+                if (SlimEmails.Count == 0) throw new Exception("File is empty");
 
+                EmailEarliestText.Text = SlimEmails.Min(e => e.Date).ToString("d");
+                var maxDate = SlimEmails.Max(e => e.Date);
+                EmailLatestText.Text = maxDate.ToString("d");
+
+                // calculate number of days to load = # of days from maxDate in SlimEmails till now
+                DateTime now = DateTime.Now;
+                int daysToLoad = ((int)(now - maxDate).TotalDays)+1;
+                DaysToLoadText.Text = daysToLoad.ToString("d");
+                
                 // populate ResultGrid with SlimEmails
                 PopulateResults();
                 
@@ -330,5 +337,15 @@ public partial class MainWindow : Window
                 groupedEmail.RememberPruneSetting = true;
             }
         }
+    }
+
+    private void ApplyAllButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        // for all _groupedEmails do the equivalent of clicking prune now in each 
+        foreach (var g in _groupedEmails)
+        {
+            PruneGroup(g);
+        }
+        SaveLocalEmailCache();
     }
 }

@@ -52,7 +52,7 @@
                 <FlowDocument PagePadding="0">
                     <Paragraph>
                         Once the results are loaded, you can
-                        <Button>TODO:Apply All Filters</Button> or 
+                        <Button Name="ApplyAllButton" Click="ApplyAllButton_OnClick">Apply All Filters</Button> or 
                         <Button Name="SendDeletesButton" Click="SendDeletesButton_OnClick">Send Deletes</Button> 
                     </Paragraph>
                 </FlowDocument>
